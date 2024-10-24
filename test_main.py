@@ -4,7 +4,6 @@ import random
 from generator import simple_event_generator, match_event_generator
 
 
-
 @pytest.mark.asyncio
 async def test_simple_event_generator():
     # Создаём асинхронный генератор
@@ -13,7 +12,6 @@ async def test_simple_event_generator():
     # Проверяем первое событие
     event = await generator.__anext__()
     assert event == {"data": "This is a server-sent event!"}
-
 
 
 @pytest.mark.asyncio

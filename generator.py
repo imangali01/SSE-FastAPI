@@ -5,12 +5,10 @@ import asyncio
 from sse_starlette.sse import ServerSentEvent
 
 
-
 async def simple_event_generator():
     for i in range(10):
         await asyncio.sleep(1)
         yield {"data": "This is a server-sent event!"}
-
 
 
 async def match_event_generator(team_a, team_b, match_duration_seconds):

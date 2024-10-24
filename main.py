@@ -9,7 +9,6 @@ from sse_starlette.sse import EventSourceResponse
 from generator import match_event_generator, simple_event_generator
 
 
-
 app = FastAPI()
 
 app.add_middleware(
@@ -23,11 +22,9 @@ app.add_middleware(
 templates = Jinja2Templates(directory="templates")
 
 
-
 @app.get("/events")
 async def sse_endpoint():
     return EventSourceResponse(simple_event_generator())
-
 
 
 @app.get("/live-scores")
@@ -38,7 +35,6 @@ async def live_scores_endpoint():
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
-
 
 
 if __name__ == "__main__":
