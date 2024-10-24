@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Sports Scores</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f7;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative; /* Allow fixed positioning within body */
+        }
+        #score-container {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            overflow: hidden; /* Prevent overflow from the container */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Combine borders */
+            margin-bottom: 20px; /* Space between table and score updates */
+        }
+        h1 {
+            color: #007bff;
+            font-size: 2rem;
+            margin: 0; /* Remove margin */
+            padding: 10px 0; /* Add padding */
+        }
+        .stopwatch {
+            font-size: 1.5rem;
+            color: #28a745;
+            padding: 10px 0; /* Add padding */
+        }
+        .event {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #e9ecef;
+            transition: background-color 0.5s ease;
+        }
+        .event.match-start {
+            background-color: #28a745;
+            color: #fff;
+            animation: fadeIn 1s ease-out;
+        }
+        .event.match-end {
+            background-color: #dc3545;
+            color: #fff;
+            animation: fadeIn 1s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        #score-updates {
+            max-height: 300px; /* Set a fixed height */
+            min-height: 300px; /* Set a fixed height */
+            overflow-y: auto; /* Enable vertical scrolling */
+            margin-top: 20px; /* Space for the event updates */
+        }
+    </style>
+</head>
+<body>
+    <div id="score-container">
+        <table>
+            <tr>
+                <td colspan="2"><h1>Live Football Scores</h1></td>
+            </tr>
+            <tr>
+                <td colspan="2" class="stopwatch" id="stopwatch">00:00</td>
+            </tr>
+        </table>
+        <div id="score-updates"></div>
+    </div>
+
+    <script>
+        // Stopwatch functionality
+        let seconds = 0;
+        let minutes = 0;
+        let stopwatchInterval;
+
+        function startStopwatch() {
+            stopwatchInterval = setInterval(function() {
+                seconds++;
+                if (seconds === 60) {
+                    minutes++;
+                    seconds = 0;
+                }
+                document.getElementById("stopwatch").textContent = 
+                    (minutes < 10 ? "0" + minutes : minutes) + ":" +
+                    (seconds < 10 ? "0" + seconds : seconds);
+            }, 1000);
+        }
+
+        function stopStopwatch() {
+            clearInterval(stopwatchInterval);
+        }
+
+        // EventSource for live scores
+        const eventSource = new EventSource("http://127.0.0.1:8000/live-scores");
+
+        eventSource.onmessage = function(event) {
+            const newElement = document.createElement("div");
+            const eventData = event.data; // Use event.data directly
+
+            try {
+                const parsedData = JSON.parse(eventData); // Parse data from backend
+
+                newElement.classList.add("event");
+                newElement.innerHTML = `Score: ${parsedData.team_a} ${parsedData.score} ${parsedData.team_b}, Event: ${parsedData.event}`;
+
+                // Handle events based on match state
+                if (parsedData.event === "Start") {
+                    newElement.classList.add("match-start");
+                    startStopwatch(); // Start stopwatch when the match begins
+                } else if (parsedData.event === "End") {
+                    newElement.classList.add("match-end");
+                    stopStopwatch(); // Stop stopwatch when the match ends
+                }
+
+                document.getElementById("score-updates").appendChild(newElement);
+            } catch (error) {
+                console.error("Error parsing event data:", error);
+            }
+        };
+
+        eventSource.onerror = function(event) {
+            console.error("EventSource failed:", event);
+            eventSource.close();
+        };
+    </script>
+</body>
+</html>
