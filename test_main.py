@@ -18,7 +18,7 @@ async def test_simple_event_generator():
 async def test_match_event_generator():
     team_a = "Inter"
     team_b = "Milan"
-    match_duration_seconds = 20
+    match_duration_seconds = 5
 
     generator = match_event_generator(team_a, team_b, match_duration_seconds)
 
@@ -32,20 +32,11 @@ async def test_match_event_generator():
 
     # Итерируем события в течение времени матча
     current_time = 0
-    while current_time < match_duration_seconds:
+    while True:
         event = await generator.__anext__()
         event_data = json.loads(event.data)
-        print(event_data)
 
-        # Проверка счёта и времени между событиями
         assert 'score' in event_data
         assert 'event' in event_data
 
-        # Увеличиваем текущее время на случайное значение
-        current_time += random.randint(1, 5)
-
-    # Проверяем завершение матча
-    end_event = await generator.__anext__()
-    end_data = json.loads(end_event.data)
-    assert end_data['event'] == "End"
-    assert 'score' in end_data
+        if event_data['event'] == "End": break
