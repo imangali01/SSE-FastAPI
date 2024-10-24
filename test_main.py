@@ -1,6 +1,5 @@
 import json
 import pytest
-import random
 from generator import simple_event_generator, match_event_generator
 
 
@@ -31,7 +30,6 @@ async def test_match_event_generator():
     assert start_data['score'] == "0:0"
 
     # Итерируем события в течение времени матча
-    current_time = 0
     while True:
         event = await generator.__anext__()
         event_data = json.loads(event.data)
@@ -39,4 +37,5 @@ async def test_match_event_generator():
         assert 'score' in event_data
         assert 'event' in event_data
 
-        if event_data['event'] == "End": break
+        if event_data['event'] == "End":
+            break
